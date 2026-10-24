@@ -1,0 +1,616 @@
+<title>Hyperterra</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a full-bleed link map with a docked article dossier on the right; stacks below the map on phones. */
+:root {
+  --bg: #f8f9fa;          /* Wikipedia page grey */
+  --panel: #ffffff;
+  --fg: #202122;          /* Wikipedia body text */
+  --muted: #54595d;
+  --line: #c8ccd1;        /* Wikipedia border grey */
+  --edge: #a2a9b1;
+  --neutral: #dfe3e8;
+  --c0: #3366cc;          /* link blue: you */
+  --c1: #795cb2;          /* visited violet */
+  --c2: #d33838;          /* red link */
+  --c3: #b7791f;          /* amber */
+  --spike: #e06c00;
+  --on-accent: #ffffff;
+  --display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --ui: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101418; --panel: #181d23; --fg: #eaecf0; --muted: #a2a9b1; --line: #2f3742; --edge: #4a5462;
+    --neutral: #2c333d; --c0: #6b9cff; --c1: #a78bdf; --c2: #f0716c; --c3: #e0a940; --spike: #ff9a3c; --on-accent: #0b1220;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101418; --panel: #181d23; --fg: #eaecf0; --muted: #a2a9b1; --line: #2f3742; --edge: #4a5462;
+  --neutral: #2c333d; --c0: #6b9cff; --c1: #a78bdf; --c2: #f0716c; --c3: #e0a940; --spike: #ff9a3c; --on-accent: #0b1220;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 15px; line-height: 1.45; }
+* { box-sizing: border-box; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--c0); outline-offset: 2px; }
+a { color: var(--c0); }
+
+.app { height: 100%; display: grid; grid-template-rows: auto auto 1fr; }
+.top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--line); background: var(--panel);
+}
+.brand { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; }
+.brand span { color: var(--c0); }
+.day { display: flex; flex-direction: column; line-height: 1.2; }
+.day b { font-weight: 600; }
+.day small { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.clans { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; white-space: nowrap; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; }
+.chip .n { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.chip.out { opacity: 0.45; text-decoration: line-through; }
+.dot.o0, .sw.o0 { background: var(--c0); } .dot.o1, .sw.o1 { background: var(--c1); }
+.dot.o2, .sw.o2 { background: var(--c2); } .dot.o3, .sw.o3 { background: var(--c3); }
+.dot.o-1, .sw.o-1 { background: var(--neutral); border: 1px solid var(--edge); }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 6px; padding: 6px 12px; }
+.btn:hover { border-color: var(--c0); }
+.btn.primary { background: var(--c0); border-color: var(--c0); color: var(--on-accent); font-weight: 600; }
+.btn.small { padding: 3px 9px; font-size: 13px; }
+.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+.news {
+  display: flex; gap: 10px; align-items: center; overflow-x: auto; white-space: nowrap;
+  padding-block: 7px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--line); font-size: 13px;
+}
+.news .label { font-weight: 600; color: var(--spike); text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; }
+.news button { border: 0; background: none; color: var(--fg); padding: 2px 4px; border-radius: 4px; }
+.news button:hover { background: var(--neutral); }
+.news .pct { font-family: var(--mono); color: var(--spike); }
+
+.main { display: grid; grid-template-columns: 1fr 380px; min-height: 0; }
+.mapwrap { position: relative; min-height: 0; overflow: hidden; }
+#map { width: 100%; height: 100%; display: block; touch-action: none; }
+.edge { stroke: var(--edge); stroke-opacity: 0.35; stroke-width: 1; }
+.edge.hot { stroke: var(--fg); stroke-opacity: 0.8; stroke-width: 1.6; }
+.node { stroke: var(--panel); stroke-width: 1.5; cursor: pointer; }
+.node.o-1 { fill: var(--neutral); stroke: var(--edge); }
+.node.o0 { fill: var(--c0); } .node.o1 { fill: var(--c1); } .node.o2 { fill: var(--c2); } .node.o3 { fill: var(--c3); }
+.node.sel { stroke: var(--fg); stroke-width: 3; }
+.node.reach { stroke: var(--c0); stroke-width: 2.5; stroke-dasharray: 3 2; }
+.ring { fill: none; stroke: var(--spike); stroke-width: 2; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) { .ring { animation: pulse 1.6s ease-in-out infinite; } }
+@keyframes pulse { 50% { stroke-opacity: 0.25; } }
+.lbl { font-family: var(--ui); fill: var(--fg); pointer-events: none; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.lbl.minor { display: none; }
+.zoomed .lbl.minor, .lbl.minor.show { display: block; }
+.legend {
+  position: absolute; left: 12px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 10px; max-width: calc(100% - 24px);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--muted);
+}
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+.legend .r { border: 2px solid var(--spike); background: none; }
+.mapctl { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; gap: 6px; }
+
+.side { border-left: 1px solid var(--line); background: var(--panel); overflow-y: auto; min-height: 0; display: flex; flex-direction: column; }
+.dossier { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; border-bottom: 1px solid var(--line); }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+.dossier h2 { font-family: var(--display); font-weight: 500; font-size: 28px; line-height: 1.15; margin: 0; text-wrap: balance; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { display: flex; flex-direction: column; }
+.stat b { font-family: var(--mono); font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+.summary { font-family: var(--display); font-size: 15px; line-height: 1.55; color: var(--fg); margin: 0; }
+.attr { font-size: 12px; color: var(--muted); }
+.spark { width: 100%; height: 64px; display: block; }
+.spark .area { fill: var(--c0); fill-opacity: 0.12; }
+.spark .ln { fill: none; stroke: var(--c0); stroke-width: 1.5; }
+.spark .grid { stroke: var(--line); stroke-width: 1; }
+.spark .now { fill: var(--spike); }
+.spark text { fill: var(--muted); font-family: var(--mono); font-size: 10px; }
+.owner { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.owner .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.moves { display: flex; flex-direction: column; gap: 6px; }
+.move { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; }
+.move .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.move .t button { border: 0; background: none; padding: 0; color: var(--c0); text-align: left; }
+.move .meta { grid-column: 1 / -1; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.move .acts { display: flex; gap: 4px; }
+.odds-good { color: var(--c0); } .odds-bad { color: var(--c2); }
+.toggle { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 8px 10px; background: var(--bg); border-radius: 6px; }
+.toggle input { margin-top: 3px; }
+.note { font-size: 13px; color: var(--muted); margin: 0; }
+.chron { padding: 16px 20px 24px; display: flex; flex-direction: column; gap: 8px; }
+.chron h3 { font-family: var(--display); font-weight: 500; font-size: 18px; margin: 0; }
+.chron ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.chron li { display: grid; grid-template-columns: 52px 1fr; gap: 8px; }
+.chron time { font-family: var(--mono); font-size: 11px; color: var(--muted); padding-top: 2px; }
+.chron li.me { font-weight: 500; }
+.chron li.news span { color: var(--spike); }
+
+.overlay { position: fixed; inset: 0; background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(3px); display: grid; place-items: center; z-index: 20; padding: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; max-width: 620px; width: 100%; max-height: 100%; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 20px 60px rgb(0 0 0 / 0.18); }
+.card h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height: 1.1; margin: 0; text-wrap: balance; }
+.card h2 { font-family: var(--display); font-weight: 500; font-size: 22px; margin: 0; text-wrap: balance; }
+.card p { margin: 0; max-width: 62ch; }
+.rules { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.homes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.home { text-align: left; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.home:hover { border-color: var(--c0); }
+.home b { font-family: var(--display); font-size: 17px; font-weight: 500; }
+.home span { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.answers { display: grid; gap: 8px; }
+.answers button { text-align: left; padding: 10px 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 8px; font-family: var(--display); font-size: 16px; }
+.answers button:hover { border-color: var(--c0); }
+.answers button.right { border-color: var(--c0); background: color-mix(in srgb, var(--c0) 14%, var(--panel)); }
+.answers button.wrong { border-color: var(--c2); background: color-mix(in srgb, var(--c2) 14%, var(--panel)); }
+table.standings { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.standings th, table.standings td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+table.standings td.num, table.standings th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 14px; z-index: 30; max-width: calc(100% - 32px); }
+
+@media (max-width: 860px) {
+  .app { height: auto; min-height: 100%; }
+  .main { grid-template-columns: 1fr; }
+  .mapwrap { height: 58vh; min-height: 340px; }
+  .side { border-left: 0; border-top: 1px solid var(--line); overflow: visible; }
+  .homes { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">Hyper<span>terra</span></div>
+    <div class="day"><small id="season">Season 1</small><b id="date">-</b></div>
+    <div class="clans" id="clans"></div>
+    <button class="btn" id="helpBtn" type="button">How to play</button>
+    <button class="btn primary" id="endDay" type="button">End day</button>
+  </header>
+  <div class="news" id="news" aria-live="polite"></div>
+  <div class="main">
+    <div class="mapwrap">
+      <svg id="map" role="img" aria-label="Map of Wikipedia articles connected by links"></svg>
+      <div class="mapctl">
+        <button class="btn small" id="zin" type="button" aria-label="Zoom in">+</button>
+        <button class="btn small" id="zout" type="button" aria-label="Zoom out">−</button>
+        <button class="btn small" id="zhome" type="button" aria-label="Center on your clan">◎</button>
+      </div>
+      <div class="legend">
+        <span><i class="o0" style="background:var(--c0)"></i>You</span>
+        <span><i style="background:var(--c1)"></i>Violet Archive</span>
+        <span><i style="background:var(--c2)"></i>Redlink Raiders</span>
+        <span><i style="background:var(--c3)"></i>Amber Index</span>
+        <span><i style="background:var(--neutral);border:1px solid var(--edge)"></i>Unclaimed</span>
+        <span><i class="r"></i>Trending today</span>
+      </div>
+    </div>
+    <aside class="side">
+      <section class="dossier" id="dossier"></section>
+      <section class="chron">
+        <h3>Season chronicle</h3>
+        <ol id="chron"></ol>
+      </section>
+    </aside>
+  </div>
+</div>
+<div id="overlay" class="overlay" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+const DATA = /*DATA*/null;
+(function () {
+  const A = DATA.articles, N = A.length, DAYS = DATA.days.length;
+  const CLANS = ['Your clan', 'Violet Archive', 'Redlink Raiders', 'Amber Index'];
+  const SAVE = 'hyperterra-s1';
+  const adj = Array.from({ length: N }, () => []);
+  DATA.edges.forEach(([a, b]) => { adj[a].push(b); adj[b].push(a); });
+  const avg = A.map(a => a.v.reduce((s, x) => s + x, 0) / DAYS);
+  const rank = [...A.keys()].sort((a, b) => avg[b] - avg[a]);
+  const prodOf = v => Math.max(1, Math.round(Math.sqrt(v) / 12));
+  const prod = (i, d) => prodOf(A[i].v[Math.min(d, DAYS - 1)]);
+  const garrison = i => Math.max(3, Math.round(prodOf(avg[i]) * 2.5));
+  const fmt = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+  const dateOf = d => new Date(DATA.days[Math.min(d, DAYS - 1)] + 'T12:00:00Z');
+  const dayLabel = d => dateOf(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const shortDate = d => dateOf(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const wikiUrl = t => 'https://en.wikipedia.org/wiki/' + encodeURIComponent(t.replace(/ /g, '_'));
+  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function spikes(d) {
+    const out = [];
+    for (let i = 0; i < N; i++) {
+      const v = A[i].v, lo = Math.max(0, d - 7);
+      const base = d === 0 ? avg[i] : v.slice(lo, d).reduce((s, x) => s + x, 0) / (d - lo);
+      const r = v[d] / Math.max(base, 1);
+      if (v[d] > 8000 && r > 1.6) out.push({ i, r });
+    }
+    return out.sort((a, b) => b.r - a.r).slice(0, 4);
+  }
+
+  function bfs(src) {
+    const dist = Array(N).fill(Infinity); dist[src] = 0; const q = [src];
+    while (q.length) { const x = q.shift(); for (const y of adj[x]) if (dist[y] === Infinity) { dist[y] = dist[x] + 1; q.push(y); } }
+    return dist;
+  }
+
+  let S = null, sel = null, duel = true;
+
+  function newSeason(home) {
+    const owner = Array(N).fill(-1), troops = A.map((_, i) => garrison(i));
+    const dHome = bfs(home), picks = [];
+    const pool = rank.slice(10, 70).filter(i => i !== home && dHome[i] >= 2);
+    while (picks.length < 3 && pool.length) {
+      let best = pool[0], bestScore = -1;
+      for (const c of pool) {
+        const others = [home, ...picks].map(p => bfs(p)[c]);
+        const s = Math.min(...others) + Math.random();
+        if (s > bestScore) { bestScore = s; best = c; }
+      }
+      picks.push(best); pool.splice(pool.indexOf(best), 1);
+    }
+    owner[home] = 0; troops[home] = 12;
+    picks.forEach((p, k) => { owner[p] = k + 1; troops[p] = 12; });
+    S = { day: 0, owner, troops, used: [], score: [0, 0, 0, 0], log: [], over: false, home };
+    for (let i = 0; i < N; i++) if (owner[i] >= 0) S.troops[i] += prod(i, 0);
+    chron(`${CLANS[0]} raised its banner over ${A[home].t}.`, 'me');
+    picks.forEach((p, k) => chron(`${CLANS[k + 1]} rose in ${A[p].t}.`));
+    newsChron();
+  }
+
+  function chron(text, kind) { S.log.unshift({ d: S.day, text, kind: kind || '' }); if (S.log.length > 120) S.log.pop(); }
+  function newsChron() {
+    const sp = spikes(S.day)[0];
+    if (sp) chron(`The world turned to ${A[sp.i].t}: readers up ${Math.round((sp.r - 1) * 100)}%.`, 'news');
+  }
+
+  function save() { try { localStorage.setItem(SAVE, JSON.stringify(S)); } catch (e) {} }
+  function load() { try { const s = JSON.parse(localStorage.getItem(SAVE)); if (s && s.owner && s.owner.length === N) return s; } catch (e) {} return null; }
+
+  function send(src, frac) { const t = S.troops[src]; return frac === 1 ? t - 1 : Math.floor(t * frac); }
+
+  function attack(src, tgt, frac, mult, clan) {
+    const n = send(src, frac); if (n < 1) return null;
+    S.troops[src] -= n;
+    const power = Math.round(n * mult), def = S.troops[tgt], prev = S.owner[tgt];
+    S.used.push(src);
+    if (power > def) {
+      S.owner[tgt] = clan; S.troops[tgt] = power - def; S.used.push(tgt);
+      const from = prev < 0 ? '' : ` from ${prev === 0 ? 'your clan' : 'the ' + CLANS[prev]}`;
+      const who = clan === 0 ? 'Your clan' : CLANS[clan];
+      if (clan === 0 || prev === 0 || rank.indexOf(tgt) < 40 || A[tgt].trend) chron(`${who} took ${A[tgt].t}${from}.`, clan === 0 || prev === 0 ? 'me' : '');
+      return { won: true, power, def };
+    }
+    S.troops[tgt] = Math.max(1, def - power);
+    if (clan === 0) chron(`Your attack on ${A[tgt].t} was repelled.`, 'me');
+    else if (prev === 0) chron(`You held ${A[tgt].t} against the ${CLANS[clan]}.`, 'me');
+    return { won: false, power, def };
+  }
+
+  function reinforce(src, tgt) {
+    const n = S.troops[src] - 1; if (n < 1) return;
+    S.troops[src] -= n; S.troops[tgt] += n; S.used.push(src);
+  }
+
+  function runAI() {
+    const d = S.day;
+    for (let c = 1; c <= 3; c++) {
+      const mine = [...A.keys()].filter(i => S.owner[i] === c).sort((a, b) => S.troops[b] - S.troops[a]);
+      for (const s of mine) {
+        if (S.used.includes(s) || S.troops[s] < 4 || S.owner[s] !== c) continue;
+        let best = -1, bs = 0;
+        const n = Math.floor(S.troops[s] * 0.75);
+        for (const t of adj[s]) {
+          if (S.owner[t] === c) continue;
+          const def = S.troops[t];
+          if (n > def * 1.15) {
+            const val = A[t].v[d] / (def + 5) * (S.owner[t] === 0 ? 1.15 : 1);
+            if (val > bs) { bs = val; best = t; }
+          }
+        }
+        if (best >= 0) attack(s, best, 0.75, 1, c);
+      }
+    }
+  }
+
+  function endDay() {
+    if (S.over) return;
+    runAI();
+    for (let i = 0; i < N; i++) if (S.owner[i] >= 0) S.score[S.owner[i]] += A[i].v[S.day];
+    const alive = [0, 1, 2, 3].filter(c => S.owner.includes(c));
+    if (!alive.includes(0)) { S.over = true; chron('Your clan lost its last territory.', 'me'); save(); render(); showEnd(); return; }
+    S.day += 1; S.used = [];
+    if (S.day >= DAYS) { S.day = DAYS - 1; S.over = true; chron('The season ended.', 'me'); save(); render(); showEnd(); return; }
+    for (let i = 0; i < N; i++) if (S.owner[i] >= 0) S.troops[i] += prod(i, S.day);
+    newsChron();
+    save(); render();
+    toast(`${shortDate(S.day)}: your territories raised ${myIncome()} troops.`);
+  }
+
+  const myIncome = () => [...A.keys()].filter(i => S.owner[i] === 0).reduce((s, i) => s + prod(i, S.day), 0);
+
+  // ---------- Map ----------
+  const svg = d3.select('#map'), root = svg.append('g');
+  const nodes = A.map((a, i) => ({ i, r: 4 + Math.min(17, Math.sqrt(avg[i]) / 22) }));
+  const links = DATA.edges.map(([a, b]) => ({ source: a, target: b }));
+  const sim = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).distance(52).strength(0.18))
+    .force('charge', d3.forceManyBody().strength(-110))
+    .force('collide', d3.forceCollide(d => d.r + 4))
+    .force('x', d3.forceX(0).strength(0.04)).force('y', d3.forceY(0).strength(0.04))
+    .stop();
+  for (let k = 0; k < 400; k++) sim.tick();
+  const edgeSel = root.append('g').selectAll('line').data(links).join('line').attr('class', 'edge')
+    .attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+  const ringSel = root.append('g').selectAll('circle').data(nodes).join('circle').attr('class', 'ring')
+    .attr('cx', d => d.x).attr('cy', d => d.y).attr('r', d => d.r + 5);
+  const nodeSel = root.append('g').selectAll('circle').data(nodes).join('circle')
+    .attr('cx', d => d.x).attr('cy', d => d.y).attr('r', d => d.r)
+    .on('click', (e, d) => { e.stopPropagation(); select(d.i); });
+  nodeSel.append('title');
+  const lblSel = root.append('g').selectAll('text').data(nodes).join('text')
+    .attr('class', d => 'lbl' + (d.r < 10 ? ' minor' : ''))
+    .attr('x', d => d.x).attr('y', d => d.y - d.r - 4).attr('text-anchor', 'middle')
+    .attr('font-size', d => d.r >= 14 ? 13 : 10).text(d => A[d.i].t);
+  svg.on('click', () => select(null));
+  const zoom = d3.zoom().scaleExtent([0.25, 6]).on('zoom', e => {
+    root.attr('transform', e.transform);
+    document.querySelector('.mapwrap').classList.toggle('zoomed', e.transform.k > 1.6);
+  });
+  svg.call(zoom);
+  function focus(i, k) {
+    const box = svg.node().getBoundingClientRect();
+    const n = nodes[i];
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity.translate(box.width / 2, box.height / 2).scale(k || 1.4).translate(-n.x, -n.y));
+  }
+  function fitAll() {
+    const box = svg.node().getBoundingClientRect();
+    const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
+    const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+    const k = Math.min(box.width / (x1 - x0 + 80), box.height / (y1 - y0 + 80));
+    svg.call(zoom.transform, d3.zoomIdentity.translate(box.width / 2, box.height / 2).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2));
+  }
+  document.getElementById('zin').onclick = () => svg.transition().call(zoom.scaleBy, 1.5);
+  document.getElementById('zout').onclick = () => svg.transition().call(zoom.scaleBy, 1 / 1.5);
+  document.getElementById('zhome').onclick = () => { const mine = rank.find(i => S.owner[i] === 0); focus(mine != null ? mine : S.home); };
+
+  function renderMap() {
+    const hot = new Set(spikes(S.day).map(s => s.i));
+    const near = new Set(sel != null ? adj[sel] : []);
+    const reach = new Set();
+    if (sel != null && S.owner[sel] === 0) adj[sel].forEach(t => { if (S.owner[t] !== 0) reach.add(t); });
+    nodeSel.attr('class', d => `node o${S.owner[d.i]}${d.i === sel ? ' sel' : ''}${reach.has(d.i) ? ' reach' : ''}`);
+    nodeSel.select('title').text(d => `${A[d.i].t}\n${S.owner[d.i] < 0 ? 'Unclaimed' : CLANS[S.owner[d.i]]} · ${S.troops[d.i]} troops\n${fmt.format(A[d.i].v[S.day])} readers on ${shortDate(S.day)}`);
+    ringSel.attr('display', d => hot.has(d.i) ? null : 'none');
+    edgeSel.attr('class', d => 'edge' + (sel != null && (d.source.i === sel || d.target.i === sel) ? ' hot' : ''));
+    lblSel.classed('show', d => d.i === sel || near.has(d.i) || S.owner[d.i] === 0 || hot.has(d.i));
+  }
+
+  // ---------- Panels ----------
+  function renderTop() {
+    document.getElementById('season').textContent = `Season 1 · Day ${S.day + 1} of ${DAYS}`;
+    document.getElementById('date').textContent = dayLabel(S.day);
+    const counts = [0, 1, 2, 3].map(c => S.owner.filter(o => o === c).length);
+    document.getElementById('clans').innerHTML = [0, 1, 2, 3].map(c =>
+      `<span class="chip${counts[c] ? '' : ' out'}" title="${CLANS[c]}: ${counts[c]} territories, ${fmt.format(S.score[c])} readers reached this season"><span class="dot o${c}"></span>${c === 0 ? 'You' : CLANS[c]}<span class="n">${counts[c]} · ${fmt.format(S.score[c])}</span></span>`).join('');
+    const eb = document.getElementById('endDay');
+    eb.disabled = S.over; eb.textContent = S.day === DAYS - 1 ? 'End season' : 'End day';
+  }
+
+  function renderNews() {
+    const sp = spikes(S.day);
+    document.getElementById('news').innerHTML = `<span class="label">Trending ${shortDate(S.day)}</span>` +
+      (sp.length ? sp.map(s => `<button type="button" data-go="${s.i}">${esc(A[s.i].t)} <span class="pct">+${Math.round((s.r - 1) * 100)}%</span></button>`).join('')
+        : '<span class="note">A quiet day on Wikipedia.</span>');
+  }
+
+  function sparkline(i) {
+    const v = A[i].v, w = 320, h = 64, max = Math.max(...v, 1);
+    const x = k => 4 + k * (w - 8) / (DAYS - 1), y = val => h - 14 - (val / max) * (h - 24);
+    const pts = v.map((val, k) => `${x(k).toFixed(1)},${y(val).toFixed(1)}`);
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Daily readers over the season, peak ${fmt.format(max)}">
+      <line class="grid" x1="4" x2="${w - 4}" y1="${h - 14}" y2="${h - 14}"/>
+      <path class="area" d="M${x(0)},${h - 14} L${pts.join(' L')} L${x(DAYS - 1)},${h - 14} Z"/>
+      <path class="ln" d="M${pts.join(' L')}"/>
+      <circle class="now" cx="${x(S.day)}" cy="${y(v[S.day])}" r="3.5"/>
+      <text x="4" y="${h - 2}">${shortDate(0)}</text><text x="${w - 4}" y="${h - 2}" text-anchor="end">${shortDate(DAYS - 1)}</text>
+      <text x="${w - 4}" y="10" text-anchor="end">peak ${fmt.format(max)}</text></svg>`;
+  }
+
+  function odds(n, def) { return n * (duel ? 1.5 : 1) > def ? (n > def ? 'odds-good">wins' : 'odds-good">wins if you ace the duel') : 'odds-bad">falls short'; }
+
+  function moveRow(src, tgt, mode) {
+    const free = !S.used.includes(src) && !S.over, o = S.owner[tgt];
+    const half = send(src, 0.5), all = send(src, 1), def = S.troops[tgt];
+    const name = mode === 'out' ? A[tgt].t : A[src].t;
+    const goto = mode === 'out' ? tgt : src;
+    if (mode === 'reinforce') {
+      return `<div class="move"><div class="t"><span class="sw o0" style="display:inline-block;width:8px;height:8px;border-radius:2px"></span> <button type="button" data-go="${tgt}">${esc(A[tgt].t)}</button></div>
+        <div class="acts"><button class="btn small" type="button" data-act="rein" data-s="${src}" data-t="${tgt}" ${free && all > 0 ? '' : 'disabled'}>Move ${Math.max(all, 0)}</button></div>
+        <div class="meta">yours · ${S.troops[tgt]} troops</div></div>`;
+    }
+    return `<div class="move"><div class="t"><span class="dot o${mode === 'out' ? o : 0}" style="display:inline-block;width:8px;height:8px;border-radius:50%"></span> <button type="button" data-go="${goto}">${esc(name)}</button></div>
+      <div class="acts">
+        <button class="btn small" type="button" data-act="atk" data-s="${src}" data-t="${tgt}" data-f="0.5" ${free && half > 0 ? '' : 'disabled'}>Send ${Math.max(half, 0)}</button>
+        <button class="btn small" type="button" data-act="atk" data-s="${src}" data-t="${tgt}" data-f="1" ${free && all > 0 ? '' : 'disabled'}>All ${Math.max(all, 0)}</button>
+      </div>
+      <div class="meta">${mode === 'out' ? (o < 0 ? 'unclaimed' : CLANS[o]) + ' · defends with ' + def : 'from here: ' + S.troops[src] + ' troops'}${free ? ' · all-in <span class="' + odds(all, def) + '</span>' : ' · already acted today'}</div></div>`;
+  }
+
+  function renderDossier() {
+    const el = document.getElementById('dossier');
+    if (sel == null) {
+      const mine = [...A.keys()].filter(i => S.owner[i] === 0).sort((a, b) => A[b].v[S.day] - A[a].v[S.day]);
+      const troops = mine.reduce((s, i) => s + S.troops[i], 0);
+      el.innerHTML = `<span class="eyebrow">Your clan</span>
+        <h2>${mine.length} ${mine.length === 1 ? 'territory' : 'territories'}</h2>
+        <div class="stats"><div class="stat"><b>${troops}</b><span>troops</span></div>
+        <div class="stat"><b>+${myIncome()}</b><span>troops / day</span></div>
+        <div class="stat"><b>${fmt.format(S.score[0])}</b><span>readers reached</span></div></div>
+        <p class="note">Select one of your blue articles to attack along its links. Tomorrow's troops come from how many people really read your articles that day.</p>
+        <div class="moves">${mine.slice(0, 12).map(i => `<div class="move"><div class="t"><button type="button" data-go="${i}">${esc(A[i].t)}</button></div><div class="acts"><span class="note">${S.troops[i]} troops</span></div><div class="meta">${fmt.format(A[i].v[S.day])} readers today · +${prod(i, S.day)}/day${S.used.includes(i) ? ' · acted' : ''}</div></div>`).join('')}</div>`;
+      return;
+    }
+    const a = A[sel], o = S.owner[sel];
+    let actions = '';
+    if (o === 0) {
+      const out = adj[sel].filter(t => S.owner[t] !== 0).sort((x, y) => S.troops[x] - S.troops[y]);
+      const own = adj[sel].filter(t => S.owner[t] === 0);
+      actions = `<span class="eyebrow">Attack along links (${out.length})</span>
+        <label class="toggle"><input type="checkbox" id="duel" ${duel ? 'checked' : ''}> <span>Knowledge duel: answer one question about the target. Right adds 50% power, wrong costs 25%.</span></label>
+        <div class="moves">${out.map(t => moveRow(sel, t, 'out')).join('') || '<p class="note">Every linked article is already yours.</p>'}</div>
+        ${own.length ? `<span class="eyebrow">Reinforce a linked territory</span><div class="moves">${own.map(t => moveRow(sel, t, 'reinforce')).join('')}</div>` : ''}`;
+    } else {
+      const from = adj[sel].filter(s => S.owner[s] === 0);
+      actions = from.length
+        ? `<span class="eyebrow">Attack from your linked territories</span>
+          <label class="toggle"><input type="checkbox" id="duel" ${duel ? 'checked' : ''}> <span>Knowledge duel: right adds 50% power, wrong costs 25%.</span></label>
+          <div class="moves">${from.map(s => moveRow(s, sel, 'in')).join('')}</div>`
+        : `<p class="note">None of your territories link here yet. Expand toward it through articles that link to ${esc(a.t)}.</p>`;
+    }
+    el.innerHTML = `<span class="eyebrow">${a.trend ? 'In the news this season · ' : ''}Article</span>
+      <h2>${esc(a.t)}</h2>
+      <div class="owner"><span class="sw o${o}"></span>${o < 0 ? 'Unclaimed' : o === 0 ? 'Your clan' : CLANS[o]}</div>
+      <div class="stats"><div class="stat"><b>${S.troops[sel]}</b><span>troops</span></div>
+        <div class="stat"><b>${fmt.format(a.v[S.day])}</b><span>readers ${shortDate(S.day)}</span></div>
+        <div class="stat"><b>+${prod(sel, S.day)}</b><span>troops / day</span></div></div>
+      ${sparkline(sel)}
+      <p class="summary">${esc(a.s || '')}</p>
+      <span class="attr">From <a href="${wikiUrl(a.t)}" target="_blank" rel="noopener">Wikipedia</a>, CC BY-SA 4.0 · ${adj[sel].length} links on the map</span>
+      ${actions}`;
+  }
+
+  function renderChron() {
+    document.getElementById('chron').innerHTML = S.log.slice(0, 40).map(l =>
+      `<li class="${l.kind}"><time>${shortDate(l.d)}</time><span>${esc(l.text)}</span></li>`).join('');
+  }
+
+  function render() { renderTop(); renderNews(); renderDossier(); renderChron(); renderMap(); }
+  function select(i) { sel = i; renderDossier(); renderMap(); }
+
+  // ---------- Duel ----------
+  function launch(src, tgt, frac) {
+    if (!duel) return resolve(src, tgt, frac, 1, null);
+    const right = adj[tgt].filter(x => x !== src);
+    const pool = right.length ? right : adj[tgt];
+    const answer = pool[Math.floor(Math.random() * pool.length)];
+    const wrong = d3.shuffle([...A.keys()].filter(x => x !== tgt && !adj[tgt].includes(x))).slice(0, 3);
+    const opts = d3.shuffle([answer, ...wrong]);
+    const ov = document.getElementById('overlay');
+    ov.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="dq">
+      <span class="eyebrow">Knowledge duel for ${esc(A[tgt].t)}</span>
+      <h2 id="dq">Which of these articles is linked both to and from “${esc(A[tgt].t)}”?</h2>
+      <div class="answers">${opts.map(x => `<button type="button" data-ans="${x}">${esc(A[x].t)}</button>`).join('')}</div>
+      <p class="note" id="dres">Get it right for +50% attack power.</p></div>`;
+    ov.hidden = false;
+    ov.querySelector('.answers button').focus();
+    ov.querySelectorAll('[data-ans]').forEach(b => b.onclick = () => {
+      const ok = +b.dataset.ans === answer;
+      ov.querySelectorAll('[data-ans]').forEach(x => { x.disabled = true; if (+x.dataset.ans === answer) x.classList.add('right'); });
+      if (!ok) b.classList.add('wrong');
+      document.getElementById('dres').textContent = ok ? 'Correct: +50% power.' : `Not quite. ${A[answer].t} was the linked article: −25% power.`;
+      setTimeout(() => { ov.hidden = true; resolve(src, tgt, frac, ok ? 1.5 : 0.75, ok); }, ok ? 800 : 1600);
+    });
+  }
+
+  function resolve(src, tgt, frac, mult, ok) {
+    const name = A[tgt].t, r = attack(src, tgt, frac, mult, 0);
+    if (!r) return;
+    save(); render();
+    toast(r.won ? `You took ${name}. ${r.power} power against ${r.def}.` : `Repelled at ${name}: ${r.power} power against ${r.def}.`);
+    if (r.won) { sel = tgt; renderDossier(); renderMap(); }
+  }
+
+  // ---------- Overlays ----------
+  function showIntro() {
+    const opts = d3.shuffle(rank.slice(45, 150)).slice(0, 6);
+    const ov = document.getElementById('overlay');
+    ov.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="it">
+      <span class="eyebrow">Season 1 · ${shortDate(0)} to ${shortDate(DAYS - 1)}</span>
+      <h1 id="it">Conquer Wikipedia, one link at a time</h1>
+      <ol class="rules">
+        <li><b>Every circle is a real Wikipedia article.</b> Lines are links that go both ways between two articles. That is the only way your troops can travel.</li>
+        <li><b>Real readers are your economy.</b> Each day replays a real day of Wikipedia. Every territory makes troops from how many people actually read that article on that date.</li>
+        <li><b>The news is the event calendar.</b> When something spikes in the real world, its article lights up orange. Grab it while it pays out.</li>
+        <li><b>Each territory acts once per day.</b> Attack a linked article, or move troops to one you own. Then press <i>End day</i>. Three rival clans do the same.</li>
+        <li><b>Win the season</b> by reaching the most readers in total by ${shortDate(DAYS - 1)}.</li>
+      </ol>
+      <h2>Pick your homeland</h2>
+      <div class="homes">${opts.map(i => `<button class="home" type="button" data-home="${i}"><b>${esc(A[i].t)}</b><span>${fmt.format(avg[i])} readers/day · ${adj[i].length} links</span></button>`).join('')}</div>
+      <p class="note">Map data: ${N} articles and ${DATA.edges.length} two-way links from English Wikipedia, with real daily page views from Wikimedia.</p></div>`;
+    ov.hidden = false;
+    ov.querySelectorAll('[data-home]').forEach(b => b.onclick = () => {
+      newSeason(+b.dataset.home); ov.hidden = true; save(); sel = S.home; render(); focus(S.home, 1.6);
+    });
+  }
+
+  function showHelp() {
+    const ov = document.getElementById('overlay');
+    ov.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="ht">
+      <h1 id="ht">How Hyperterra works</h1>
+      <ol class="rules">
+        <li>Select one of your blue articles. Its linked articles are ringed with a dashed line.</li>
+        <li>Send half or all of its troops at a linked article. You win if your power beats its defenders.</li>
+        <li>Turn on the knowledge duel for +50% power if you can name an article it links with.</li>
+        <li>Press <i>End day</i>. Rivals move, then every territory earns troops from that day's real readers.</li>
+        <li>Orange rings mark today's real-world spikes: articles suddenly read far more than usual.</li>
+      </ol>
+      <p class="note">In the full game, clans are real people, a season runs live against today's Wikipedia, and every territory has its own shareable link.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" type="button" id="closeHelp">Back to the map</button><button class="btn" type="button" id="restart">Start a new season</button></div></div>`;
+    ov.hidden = false;
+    document.getElementById('closeHelp').onclick = () => { ov.hidden = true; };
+    document.getElementById('restart').onclick = () => { try { localStorage.removeItem(SAVE); } catch (e) {} showIntro(); };
+  }
+
+  function showEnd() {
+    const order = [0, 1, 2, 3].sort((a, b) => S.score[b] - S.score[a]);
+    const place = order.indexOf(0) + 1;
+    const ov = document.getElementById('overlay');
+    ov.innerHTML = `<div class="card" role="dialog" aria-modal="true" aria-labelledby="et">
+      <span class="eyebrow">Season 1 is over</span>
+      <h1 id="et">${S.owner.includes(0) ? (place === 1 ? 'Your clan won the season' : `Your clan finished ${['first', 'second', 'third', 'fourth'][place - 1]}`) : 'Your clan was wiped out'}</h1>
+      <table class="standings"><tr><th>Clan</th><th class="num">Territories</th><th class="num">Readers reached</th></tr>
+        ${order.map(c => `<tr><td><span class="dot o${c}" style="display:inline-block;width:10px;height:10px;border-radius:50%"></span> ${CLANS[c]}</td><td class="num">${S.owner.filter(o => o === c).length}</td><td class="num">${fmt.format(S.score[c])}</td></tr>`).join('')}</table>
+      <h2>From the chronicle</h2>
+      <ol class="rules">${S.log.filter(l => l.kind === 'me').slice(0, 6).map(l => `<li>${shortDate(l.d)}: ${esc(l.text)}</li>`).join('')}</ol>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" type="button" id="again">Play another season</button><button class="btn" type="button" id="look">Look at the final map</button></div></div>`;
+    ov.hidden = false;
+    document.getElementById('again').onclick = () => { try { localStorage.removeItem(SAVE); } catch (e) {} showIntro(); };
+    document.getElementById('look').onclick = () => { ov.hidden = true; };
+  }
+
+  let toastTimer;
+  function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 2600); }
+
+  // ---------- Events ----------
+  document.addEventListener('click', e => {
+    const go = e.target.closest('[data-go]');
+    if (go) { const i = +go.dataset.go; select(i); focus(i); return; }
+    const act = e.target.closest('[data-act]');
+    if (!act || act.disabled) return;
+    const s = +act.dataset.s, t = +act.dataset.t;
+    if (act.dataset.act === 'rein') { reinforce(s, t); save(); render(); toast(`Moved troops to ${A[t].t}.`); }
+    else launch(s, t, +act.dataset.f);
+  });
+  document.addEventListener('change', e => { if (e.target.id === 'duel') { duel = e.target.checked; renderDossier(); } });
+  document.getElementById('endDay').onclick = endDay;
+  document.getElementById('helpBtn').onclick = showHelp;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { const ov = document.getElementById('overlay'); if (S && !ov.hidden && !ov.querySelector('[data-home]') && !ov.querySelector('[data-ans]')) ov.hidden = true; } });
+
+  fitAll();
+  S = load();
+  if (S) { render(); if (S.over) showEnd(); }
+  else {
+    // Draw a sample state behind the intro so the map reads as a game at rest.
+    newSeason(rank[90]); render(); S = null; showIntro();
+  }
+})();
+</script>
