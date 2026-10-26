@@ -43,7 +43,17 @@ pg_dump "$DB_URL" --schema=<app> --schema=<app>_private --no-owner --no-privileg
 Restore into the new project, re-run the app's grants block, and recreate its user(s) with the same UUIDs
 (or remap `user_id`). Then point the app at the new URL/key.
 
-## One-time dashboard settings
+## Auth settings shared by all apps
 
 - Authentication → Sign In / Providers: turn **off** "Allow new users to sign up". This keeps strangers from creating
   accounts on any app.
+- Authentication → URL Configuration:
+  - **Redirect URLs** is an allow-list. Add each app's exact URL (no wildcards like `*.onrender.com`, which
+    would match other people's sites). Each app passes its own URL as `emailRedirectTo`.
+  - **Site URL** is the single fallback when a requested URL isn't on the list. Leave it alone.
+  - Only email links (magic link, password reset) use these. Password sign-in doesn't.
+- Email templates are shared, so keep their wording app-neutral.
+
+| App        | URL                                  |
+|------------|--------------------------------------|
+| excalidraw | https://drawings-v9u1.onrender.com   |
