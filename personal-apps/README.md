@@ -1,6 +1,6 @@
 # personal-apps (Supabase)
 
-One Supabase project (`personal-apps`, ref `xhvzzsblfumpnrtfmrdg`) holding the database for several personal apps.
+One Supabase project (`personal-apps-ca`, ref `nxeugbwlmjjagapwotwz`, region `ca-central-1`) holding the database for several personal apps.
 Apps share one login (`auth.users`) and are otherwise fully separate.
 
 ```
@@ -10,7 +10,7 @@ auth                 shared: one account for all apps
 public               empty: no app tables here
 ```
 
-Current apps: `excalidraw` (applied), `fitness_plan` (migration pending, see `apps/fitness_plan/AGENT_PROMPT.md`).
+Current apps: `excalidraw` (`apps/excalidraw/`), `fitness_plan` (`apps/fitness_plan/000_baseline.sql`).
 
 ## Rules for every app
 
